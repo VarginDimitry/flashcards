@@ -18,8 +18,9 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             set -e
-            cd /root/apps/fleshcards
+            cd /root/apps/fleshcards/flashcards
             git pull --rebase
+            cd ..
             docker system prune -f
             docker compose down
             docker compose up -d --build
