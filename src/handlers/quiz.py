@@ -12,6 +12,7 @@ from dishka import FromDishka
 from miniopy_async import Minio
 from pymongo.asynchronous.database import AsyncDatabase
 
+from handlers.filters import MY_ID
 from models import CardDto
 
 quiz_router = Router()
@@ -77,7 +78,7 @@ async def send_question(
         await message.answer(question_text)
 
 
-@quiz_router.message(Command("quiz"), StateFilter("*"))
+@quiz_router.message(Command("quiz"), StateFilter("*"), F.from_user.id == MY_ID)
 async def start_quiz_handler(
     message: Message,
     state: FSMContext,
@@ -139,7 +140,7 @@ async def start_quiz_handler(
         )
 
 
-@quiz_router.message(QuizState.answering, F.text)
+@quiz_router.message(QuizState.answering, F.text, F.from_user.id == MY_ID)
 async def answer_quiz_handler(
     message: Message,
     state: FSMContext,

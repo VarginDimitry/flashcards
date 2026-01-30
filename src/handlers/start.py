@@ -1,12 +1,14 @@
-from aiogram import Router
+from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from handlers.filters import MY_ID
+
 start_router = Router()
 
 
-@start_router.message(Command("start"), StateFilter("*"))
+@start_router.message(Command("start"), StateFilter("*"), F.from_user.id == MY_ID)
 async def start_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
 

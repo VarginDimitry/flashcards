@@ -10,12 +10,15 @@ from dishka import FromDishka
 from miniopy_async import Minio
 from pymongo.asynchronous.database import AsyncDatabase
 
+from handlers.filters import MY_ID
 from models import InsertCardDto
 
 add_card_router = Router()
 
 
-@add_card_router.message(F.photo, Command("add_card"), StateFilter("*"))
+@add_card_router.message(
+    F.photo, Command("add_card"), StateFilter("*"), F.from_user.id == MY_ID
+)
 async def add_card_handler(
     message: Message,
     state: FSMContext,
