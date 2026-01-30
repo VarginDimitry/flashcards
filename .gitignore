@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+
+# IDE
+.vscode/
+
+
+# Data
+mongo_data/
+minio_data/
+
+# Env
+.env
+docker.env
+
+# local
+local.docker-compose.yml

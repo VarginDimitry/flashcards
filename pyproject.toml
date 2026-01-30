@@ -1,0 +1,31 @@
+[project]
+name = "quizpy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiofiles>=25.1.0",
+    "aiogram>=3.24.0",
+    "colorama>=0.4.6",
+    "coloredlogs>=15.0.1",
+    "dishka>=1.7.2",
+    "miniopy-async>=1.23.4",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+    "pymongo>=4.16.0",
+]
+
+[project.optional-dependencies]
+lint = [
+    "isort>=6.0.1",
+    "ruff>=0.12.0",
+]
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+use_parentheses = true
+line_length = 120
+order_by_type = false
+combine_as_imports = true
