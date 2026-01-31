@@ -25,4 +25,4 @@ jobs:
             docker compose down
             docker compose up -d --build
             echo "=== Проверка контейнера ==="
-            docker inspect -f "{{.State.Running}}" bot || (echo "Контейнер не запущен!" && exit 1)
+            docker inspect -f "{{.State.Running}}" fleshcards-bot || (echo "Контейнер не запущен!" && exit 1)
