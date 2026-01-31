@@ -30,14 +30,14 @@ class QuizState(StatesGroup):
 
 def get_random_quiz_actions() -> tuple[QuizAction, QuizAction]:
     actions = [QuizAction.IMAGE, QuizAction.ENGLISH, QuizAction.RUSSIAN]
-
+    
     question_type = random.choice(actions)
-    actions.remove(question_type)
-    if question_type != QuizAction.IMAGE:
-        actions.remove(QuizAction.IMAGE)
-
-    answer_type = random.choice(actions)
-    return question_type, answer_type
+    if question_type == QuizAction.IMAGE or question_type == QuizAction.RUSSIAN:
+        return question_type, QuizAction.ENGLISH
+    elif question_type == QuizAction.ENGLISH:
+        return question_type, QuizAction.RUSSIAN
+    else:
+        raise ValueError(f"Invalid question type: {question_type}")
 
 
 async def send_question(
