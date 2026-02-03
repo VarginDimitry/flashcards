@@ -16,9 +16,7 @@ from models import InsertCardDto
 add_card_router = Router()
 
 
-@add_card_router.message(
-    F.photo, Command("add_card"), StateFilter("*"), F.from_user.id == MY_ID
-)
+@add_card_router.message(Command("add_card"), StateFilter("*"), F.from_user.id == MY_ID)
 async def add_card_handler(
     message: Message,
     state: FSMContext,
@@ -29,15 +27,16 @@ async def add_card_handler(
     await state.clear()
 
     error_text = (
-        "Please send a message with photo and text in format:\n"
+        "Please send a message with text in format and photo (optional):\n"
         "/add_card\n"
         "english text\n"
         "russian text"
     )
-    if not message.caption or not message.photo:
+    text = message.text or message.caption
+    if not text:
         return await message.answer(error_text)
 
-    lines = message.caption.strip().split("\n")
+    lines = text.strip().split("\n")
     if len(lines) != 3:
         return await message.answer(error_text)
 
@@ -47,7 +46,9 @@ async def add_card_handler(
         return await message.answer("Both English and Russian text must be non-empty.")
 
     try:
-        image_url = await upload_photo_to_s3(message, s3, logger)
+        image_url = None
+        if message.photo:
+            image_url = await upload_photo_to_s3(message, s3, logger)
         flash_card = InsertCardDto(
             english=english,
             russian=russian,
@@ -61,7 +62,7 @@ async def add_card_handler(
             f"✅ Flash card created successfully!\n\n"
             f"English: {flash_card.english}\n"
             f"Russian: {flash_card.russian}\n"
-            f"Image uploaded: {image_url}"
+            + (f"Image uploaded: {image_url}" if image_url else "")
         )
 
     except Exception as e:

@@ -28,9 +28,11 @@ class QuizState(StatesGroup):
     answering = State()
 
 
-def get_random_quiz_actions() -> tuple[QuizAction, QuizAction]:
-    actions = [QuizAction.IMAGE, QuizAction.ENGLISH, QuizAction.RUSSIAN]
-    
+def get_random_quiz_actions(card: CardDto) -> tuple[QuizAction, QuizAction]:
+    actions = [QuizAction.ENGLISH, QuizAction.RUSSIAN]
+    if card.image_url:
+        actions.append(QuizAction.IMAGE)
+
     question_type = random.choice(actions)
     if question_type == QuizAction.IMAGE or question_type == QuizAction.RUSSIAN:
         return question_type, QuizAction.ENGLISH
@@ -101,7 +103,9 @@ async def start_quiz_handler(
             )
         flashcards = [CardDto.model_validate(card) for card in flashcards_data]
 
-        question_type, answer_type = get_random_quiz_actions()
+        first_card = flashcards[0]
+
+        question_type, answer_type = get_random_quiz_actions(first_card)
 
         await state.update_data(
             flashcards=flashcards,
@@ -118,7 +122,6 @@ async def start_quiz_handler(
         await message.answer(f"📚 Quiz started! Total cards: {len(flashcards)}")
 
         # Show first question based on question type
-        first_card = flashcards[0]
         await send_question(
             message,
             first_card,
@@ -152,7 +155,7 @@ async def answer_quiz_handler(
     try:
         # Get current quiz data from state
         data = await state.get_data()
-        flashcards_data = data.get("flashcards")
+        flashcards_data: list[CardDto] = data.get("flashcards")
         current_index = data.get("current_index")
         correct_count = data.get("correct_count")
         question_type_str = data.get("question_type")
@@ -204,8 +207,9 @@ async def answer_quiz_handler(
                     f"Great job! Start a new quiz with /quiz"
                 )
 
+            next_card = flashcards_data[current_index]
             # Get random question and answer types for next question
-            next_question_type, next_answer_type = get_random_quiz_actions()
+            next_question_type, next_answer_type = get_random_quiz_actions(next_card)
 
             # Update state with new index, correct count, and question/answer types
             await state.update_data(
@@ -219,7 +223,6 @@ async def answer_quiz_handler(
             await message.answer("✅ Correct!")
 
             # Show next question
-            next_card = CardDto.model_validate(flashcards_data[current_index])
             await send_question(
                 message,
                 next_card,

@@ -8,7 +8,7 @@ class InsertCardDto(BaseModel):
     english: str
     russian: str
 
-    image_url: str
+    image_url: str | None = None
 
     priority: int = 0
     use_count: int = 0
