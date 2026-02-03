@@ -1,42 +1,37 @@
-import asyncio
-from logging import Logger
+import logging
+from contextlib import asynccontextmanager
 
-from aiogram import Bot, Dispatcher
-from aiogram.fsm.storage.base import BaseStorage
-from dishka import AsyncContainer, make_async_container
-from dishka.integrations.aiogram import AiogramProvider, setup_dishka
+from dishka import make_async_container
+from dishka.integrations.fastapi import setup_dishka
+from fastapi import FastAPI
 
-from handlers import get_router
+from api import get_api_router
+from config import Config
 from provider import RootProvider
 
 
-def create_container() -> AsyncContainer:
-    return make_async_container(
-        AiogramProvider(),
-        RootProvider(),
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    container = app.state.dishka_container
+    config = await container.get(Config)
+    logger = await container.get(logging.Logger)
+    logger.info("Starting %s", config.app_name)
+    yield
+    logger.info("Shutting down %s", config.app_name)
+    await container.close()
+
+
+def create_app() -> FastAPI:
+    container = make_async_container(RootProvider())
+    app = FastAPI(
+        title="QuizPy API",
+        description="API for adding flash cards, getting quiz cards, and submitting quiz answers.",
+        version="0.1.0",
+        lifespan=lifespan,
     )
+    app.include_router(get_api_router())
+    setup_dishka(container=container, app=app)
+    return app
 
 
-async def setup_logging(container: AsyncContainer) -> None:
-    logger = await container.get(Logger)
-
-    from aiogram import loggers as aiogram_loggers
-
-    logger_types = ("dispatcher", "event", "middlewares", "webhook", "scene")
-    for logger_type in logger_types:
-        setattr(aiogram_loggers, logger_type, logger.getChild(f"aiogram.{logger_type}"))
-
-
-async def main() -> None:
-    container = create_container()
-    await setup_logging(container)
-
-    dp = Dispatcher(storage=await container.get(BaseStorage))
-    dp.include_routers(get_router())
-    setup_dishka(container=container, router=dp, auto_inject=True)
-
-    await dp.start_polling(await container.get(Bot))
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+app = create_app()

@@ -30,4 +30,4 @@ COPY --from=builder /packages/.venv/lib/python3.13/site-packages /usr/local/lib/
 COPY src /app
 
 # Set entrypoint
-CMD ["python", "app.py"]
+CMD ["uvicorn", "app:app", "--port", "8000"]

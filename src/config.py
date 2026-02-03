@@ -2,13 +2,6 @@ from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
-class BotConfig(BaseSettings):
-    model_config = ConfigDict(extra="ignore")
-
-    token: str
-    refresh_bot_data: bool = True
-
-
 class S3Config(BaseSettings):
     model_config = ConfigDict(extra="ignore")
 
@@ -26,7 +19,6 @@ class MongoConfig(BaseSettings):
 
 class Config(BaseSettings):
     app_name: str = "quizpy"
-    bot: BotConfig
     mongo: MongoConfig
     s3: S3Config
 
